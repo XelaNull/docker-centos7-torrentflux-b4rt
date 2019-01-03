@@ -42,6 +42,14 @@ docker build -t centos7/b4rt .
 docker run -d --name=CENTOS7-b4rt -p 8080:80 centos7/b4rt
 ```
 
+**To Access:**
+
+```
+http://YOURIP:8080
+```
+
+The first username and password you provide is created as your administrative account.
+
 **To Enter:**
 
 ```
