@@ -1,4 +1,4 @@
-# Dockerfile for CentOS7 Torrentflux-b4rt
+# Dockerfile for CentOS 7.6 + Apache 2.4 + PHP 7.2 + Torrentflux-b4rt 1.0_beta2
 
 Torrentflux-b4rt appears to be a dead project, with the original website no longer online. After scouring the Internet for all forks of torrentflux, I've concluded that torrentflux-b4rt is still the best option with the most features. The newest code of torrentflux-b4rt that I could find was years old and had parse errors in multiple PHP files. Lastly, I found that the version of transmission-cli available in YUM is no longer compatible with Torrentflux-b4rt. I did find it is possible to patch and compile a somewhat recent version of transmission, so that it is compatible with Torrentflux-b4rt once again. Fortunately, everything needed to fix these issues was available on github.com: torrentflux-b4rt source code, transmission source code, transmission patch, were all found here on github. I forked each of these to ensure their survival as it relates to this project.
 
@@ -8,13 +8,14 @@ This Dockerfile provides a single container that provides an entire instance of 
 
 The goal of this project is to provide a single Dockerfile that will create a Docker container that is comprised of:
 
-- CentOS7
+- CentOS 7
 - Supervisor
 - Syslog-NG
 - Cron
-- Apache HTTP
-- MariaDB
-- Torrentflux-b4rt
+- Apache 2.4 HTTP
+- PHP 7.2
+- MariaDB 5.5
+- Torrentflux-b4rt 1.0_beta2
 
 **Packages Installed**
 
