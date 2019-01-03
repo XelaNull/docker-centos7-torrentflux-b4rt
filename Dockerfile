@@ -4,7 +4,7 @@ FROM centos:7
 #Currently works with a blank root MariaDB password (BAD IDEA)
 ENV DBNAME="torrentflux"
 ENV DBUSER="torrentflux"
-ENV DBPASS="${RANDOM}"
+ENV DBPASS="#y56toq34tyq3"
 ENV TIMEZONE="America/New_York"
 
 # Install YUM pre-requisite REPOs and Packages
@@ -34,9 +34,9 @@ RUN { \
       echo '<?php'; \
       echo '$cfg["db_type"] = "mysql";'; \
       echo '$cfg["db_host"] = "localhost";'; \
-      echo "$cfg[\"db_name\"] = \"${DBNAME}\";"; \
-      echo "$cfg[\"db_user\"] = \"${DBUSER}\";"; \
-      echo "$cfg[\"db_pass\"] = \"${DBPASS}\";"; \
+      echo "\$cfg[\"db_name\"] = \"${DBNAME}\";"; \
+      echo "\$cfg[\"db_user\"] = \"${DBUSER}\";"; \
+      echo "\$cfg[\"db_pass\"] = \"${DBPASS}\";"; \
       echo '$cfg["db_pcon"] = true;'; \
     } | tee /var/www/html/inc/config/config.db.php
 # Create a .sql file that can be read in the first time MariaDB is started, that creates the Torrentflux-b4rt Database
