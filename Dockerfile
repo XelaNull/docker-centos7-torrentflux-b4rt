@@ -7,15 +7,22 @@ ENV DBUSER="torrentflux"
 ENV DBPASS="#y56toq34tyq3"
 ENV TIMEZONE="America/New_York"
 
-# Install YUM pre-requisite REPOs and Packages
+# First install EPEL & Webtatic REPOs as they are needed for some of the initial packages
+RUN yum -y install epel-release yum-utils
+
+# Install Webtatic YUM REPO, to provide PHP7
+RUN rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm && \
+    yum -y install mod_php72w php72w-opcache php72w-cli php72w-mysqli httpd mariadb-server
+  
+# Install VLC via RPMFusion REPOT
 RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm -y && \
-    yum install http://rpms.remirepo.net/enterprise/remi-release-7.rpm -y && \
-    yum -y install epel-release && \
-    yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
-    vlc rsync nc cronie openssh sudo syslog-ng mariadb-server httpd php-mysql mlocate \
-    git php php-cli unzip bzip2 libcurl-devel libevent-devel intltool openssl-devel && \
-    yum update -y
-    
+    yum -y install vlc
+
+# Install all other YUM-based packages
+RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
+    vlc rsync nc cronie openssh sudo syslog-ng mlocate git unzip bzip2 libcurl-devel \
+    libevent-devel intltool openssl-devel
+        
 # Create MySQL Start Script
 RUN { \
     echo "#!/bin/bash"; \
@@ -32,7 +39,7 @@ RUN cd /usr/share && git clone https://github.com/XelaNull/torrentflux-b4rt-php7
 # Create the Torrentflux-b4rt DB configuration file
 RUN { \
       echo '<?php'; \
-      echo '$cfg["db_type"] = "mysql";'; \
+      echo '$cfg["db_type"] = "mysqli";'; \
       echo '$cfg["db_host"] = "localhost";'; \
       echo "\$cfg[\"db_name\"] = \"${DBNAME}\";"; \
       echo "\$cfg[\"db_user\"] = \"${DBUSER}\";"; \
@@ -50,6 +57,7 @@ RUN { \
     } | tee /mysql_load_on_first_boot.sql && cp /usr/share/torrentflux/sql/mysql/mysql_torrentflux-b4rt-1.0.sql /tmp.sql && \
     sed -i 's|/usr/bin/unrar|/usr/local/bin/unrar|g' /tmp.sql && \
     sed -i 's|/usr/bin/cksfv|/usr/local/bin/cksfv|g' /tmp.sql && \
+    sed -i 's|/usr/local/bin/vlc|/usr/bin/vlc|g' /tmp.sql && \
     sed -i 's|/usr/local/bin/transmissioncli|/usr/local/bin/transmission-cli|g' /tmp.sql && \
     sed -i 's|/var/www/|/var/www/html/|g' /tmp.sql && \
     sed -i "s|'enable_home_dirs','1'|'enable_home_dirs','0'|g" /tmp.sql && \
