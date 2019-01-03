@@ -68,7 +68,7 @@ RUN wget http://www.fpx.de/fp/Software/UUDeview/download/uudeview-0.5.20.tar.gz 
 
 # Create and Build Transmission 2.73 for Torrentflux-b4rt
 RUN cd /root && wget https://github.com/XelaNull/transmission-releases/raw/master/transmission-2.73.tar.bz2 && tar jxvf transmission-2.73.tar.bz2 && \
-    cd transmission-2.73 && git clone https://github.com/Shouden/torrentflux.git && \
+    cd transmission-2.73 && git clone https://github.com/XelaNull/torrentflux.git && \
     rm -rf cli/cli.c && cp torrentflux/clients/transmission/transmission-2.73/cli.c cli/ && \
     rm -rf libtransmission/transmission.h && cp torrentflux/clients/transmission/transmission-2.73/transmission.h libtransmission/ && \
     ./configure --enable-cli --enable-daemon && make && strip cli/transmission-cli && cp cli/transmission-cli /usr/local/bin/
