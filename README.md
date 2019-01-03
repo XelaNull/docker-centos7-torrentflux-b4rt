@@ -2,11 +2,11 @@
 
 Torrentflux-b4rt appears to be a dead project, with the original website no longer online. After scouring the Internet for all forks of torrentflux, I've concluded that torrentflux-b4rt is still the best option with the most features. The newest code of torrentflux-b4rt that I could find was years old and had parse errors in multiple PHP files. Lastly, I found that the version of transmission-cli available in YUM is no longer compatible with Torrentflux-b4rt. I did find it is possible to patch and compile a somewhat recent version of transmission, so that it is compatible with Torrentflux-b4rt once again. Fortunately, everything needed to fix these issues was available on github.com: torrentflux-b4rt source code, transmission source code, and the transmission patch. I forked each of these to ensure their survival as it relates to this project.
 
-**As best as I know, this project represents the newest working version of Torrentflux-b4rt, as a Dockerfile as of January 2019.**
+**As best as I know, this project represents the newest working version of Torrentflux-b4rt, as a Dockerfile, as of January 2019.**
 
 If you just want standalone Torrentflux-b4rt package, please see: <https://github.com/XelaNull/torrentflux-b4rt-php7>
 
-This Dockerfile provides a single container image that provides an entire instance of Torrentflux-b4rt, already pre-configured with what I think are optimal settings for use on a seedbox. There is only a single pre-requisite for using this: **docker**
+This Dockerfile provides a single container image that provides an entire immediately-usable instance of Torrentflux-b4rt, already pre-configured with what I think are optimal settings for use on a seedbox. There is only a single pre-requisite for using this: **docker**
 
 The goal of this project is to provide a single Dockerfile that will create a Docker container that is comprised of:
 
