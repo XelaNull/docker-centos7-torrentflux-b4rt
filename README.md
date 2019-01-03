@@ -6,7 +6,7 @@ Torrentflux-b4rt appears to be a dead project, with the original website no long
 
 If you just want standalone Torrentflux-b4rt package, please see: <https://github.com/XelaNull/torrentflux-b4rt-php7>
 
-This Dockerfile provides a single container that provides an entire instance of Torrentflux-b4rt, already pre-configured with what I think are optimal settings for use on a seedbox. There is only a single pre-requisite for using this: docker
+This Dockerfile provides a single container image that provides an entire instance of Torrentflux-b4rt, already pre-configured with what I think are optimal settings for use on a seedbox. There is only a single pre-requisite for using this: **docker**
 
 The goal of this project is to provide a single Dockerfile that will create a Docker container that is comprised of:
 
@@ -21,6 +21,7 @@ The goal of this project is to provide a single Dockerfile that will create a Do
 
 **Packages Installed**
 
+- transmission 2.73
 - rSync
 - wget
 - unzip
@@ -28,7 +29,6 @@ The goal of this project is to provide a single Dockerfile that will create a Do
 - rar/unrar
 - uudeview
 - cksfv
-- transmission 2.73
 
 **To Build:**
 
