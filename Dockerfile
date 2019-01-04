@@ -9,24 +9,16 @@ ENV TIMEZONE="America/New_York"
 
 # First install EPEL & Webtatic REPOs as they are needed for some of the initial packages
 RUN yum -y install epel-release yum-utils
-
 # Install newest stable MariaDB: 10.3 
-RUN { \
-    echo "[mariadb]"; \
-    echo "name = MariaDB"; \
-    echo "baseurl = http://yum.mariadb.org/10.3/centos7-amd64"; \
-    echo "gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"; \
-    echo "gpgcheck=1"; \
+RUN { echo "[mariadb]"; echo "name = MariaDB"; echo "baseurl = http://yum.mariadb.org/10.3/centos7-amd64"; \
+    echo "gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"; BTW Lecho "gpgcheck=1"; \
     } | tee /etc/yum.repos.d/MariaDB-10.3.repo && yum -y install MariaDB-server MariaDB-client
-
 # Install Webtatic YUM REPO, to provide PHP7
 RUN rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm && \
     yum -y install mod_php72w php72w-opcache php72w-cli php72w-mysqli httpd
-  
 # Install VLC via RPMFusion REPOT
 RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm -y && \
     yum -y install vlc
-
 # Install all other YUM-based packages
 RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
     vlc rsync nc cronie openssh sudo syslog-ng mlocate git unzip bzip2 libcurl-devel \
@@ -34,8 +26,7 @@ RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++
     perl-local-lib perl-App-cpanminus cpan sysvinit-tools && cpanm IO::Select
             
 # Create MySQL Start Script
-RUN { \
-    echo "#!/bin/bash"; \
+RUN { echo "#!/bin/bash"; \
     echo "[[ \`pidof /usr/sbin/mysqld\` == \"\" ]] && /usr/bin/mysqld_safe &"; \
     echo "export SQL_TO_LOAD='/mysql_load_on_first_boot.sql';"; \
     echo "while true; do"; \
@@ -49,8 +40,7 @@ RUN cd /usr/share && git clone https://github.com/XelaNull/torrentflux-b4rt-php7
     cp -rp /usr/share/torrentflux/html/* /var/www/html/ && mkdir /var/www/html/downloads && chown apache /var/www/html/* -R && \
     rm -rf /etc/httpd/conf.d/welcome.conf && echo "date.timezone='${TIMEZONE}'" > /etc/php.d/timezone.ini && rm -rf /var/www/html/setup.php
 # Create the Torrentflux-b4rt DB configuration file
-RUN { \
-      echo '<?php'; \
+RUN { echo '<?php'; \
       echo '$cfg["db_type"] = "mysqli";'; \
       echo '$cfg["db_host"] = "localhost";'; \
       echo "\$cfg[\"db_name\"] = \"${DBNAME}\";"; \
@@ -58,7 +48,7 @@ RUN { \
       echo "\$cfg[\"db_pass\"] = \"${DBPASS}\";"; \
       echo '$cfg["db_pcon"] = true;'; \
     } | tee /var/www/html/inc/config/config.db.php
-# Create a .sql file that can be read in the first time MariaDB is started, that creates the Torrentflux-b4rt Database
+# Create a .sql file that is read in the first time MariaDB is started, that creates the Torrentflux-b4rt Database
 # This section also contains any customized defaults that I would like set. The full list can be found at:
 #     /usr/share/torrentflux/sql/mysql/mysql_torrentflux-b4rt-1.0.sql
 RUN { \
@@ -92,14 +82,12 @@ RUN { \
 RUN cd /root && wget https://www.rarlab.com/rar/rarlinux-x64-5.5.0.tar.gz && tar -zxf rarlinux-x64-5.5.0.tar.gz && cd rar && cp rar unrar /usr/local/bin/
 RUN wget http://www.fpx.de/fp/Software/UUDeview/download/uudeview-0.5.20.tar.gz && tar zxvf uudeview-0.5.20.tar.gz && \
     cd uudeview-0.5.20 && ./configure && make && make install
-
 # Create and Build Transmission 2.73 for Torrentflux-b4rt
 RUN cd /root && wget https://github.com/XelaNull/transmission-releases/raw/master/transmission-2.73.tar.bz2 && tar jxvf transmission-2.73.tar.bz2 && \
     cd transmission-2.73 && git clone https://github.com/XelaNull/torrentflux.git && \
     rm -rf cli/cli.c && cp torrentflux/clients/transmission/transmission-2.73/cli.c cli/ && \
     rm -rf libtransmission/transmission.h && cp torrentflux/clients/transmission/transmission-2.73/transmission.h libtransmission/ && \
     ./configure --enable-cli --enable-daemon && make && strip cli/transmission-cli && cp cli/transmission-cli /usr/local/bin/
-
 # Compile cksfv
 RUN cd /root && git clone https://github.com/vadmium/cksfv.git && cd cksfv && ./configure && make && make install
 
@@ -116,12 +104,7 @@ RUN { \
     echo 'echo "priority=1";'; \
     echo 'echo "";'; \
   } | tee /gen_sup.sh && chmod a+x /gen_sup.sh && \
-  { \
-    echo '[supervisord]'; \
-    echo 'nodaemon        = true'; \
-    echo 'user            = root'; \
-    echo 'logfile         = /var/log/supervisord'; echo; \
-  } | tee /etc/supervisord.conf && \  
+  { echo '[supervisord]';echo 'nodaemon=true';echo 'user=root';echo 'logfile=/var/log/supervisord'; echo; } | tee /etc/supervisord.conf && \  
     /gen_sup.sh syslog-ng "/usr/sbin/syslog-ng -F" >> /etc/supervisord.conf && \
     /gen_sup.sh crond "/usr/sbin/crond -n" >> /etc/supervisord.conf && \
     /gen_sup.sh httpd "/usr/sbin/apachectl -D FOREGROUND" >> /etc/supervisord.conf && \
@@ -129,9 +112,7 @@ RUN { \
     
 # Ensure all packages are up-to-date, then fully clean out all cache
 RUN yum -y update && yum clean all && rm -rf /tmp/* && rm -rf /var/tmp/*
-
 # Define the downloads directory as an externally mounted volume
 VOLUME ["/var/www/html/downloads"]
-
 # Set to start the supervisor daemon on bootup
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
