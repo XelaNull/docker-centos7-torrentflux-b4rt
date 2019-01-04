@@ -1,4 +1,4 @@
-# Dockerfile for CentOS 7.6 + Apache 2.4 + PHP 7.2 + Torrentflux-b4rt 1.0_beta2
+# Dockerfile for CentOS 7.6 + Apache 2.4 + MariaDB 10.3 + PHP 7.2 + Torrentflux-b4rt 1.0_beta2
 
 Torrentflux-b4rt appears to be a dead project, with the original website no longer online. After scouring the Internet for all forks of torrentflux, I've concluded that torrentflux-b4rt is still the best option with the most features. The newest code of torrentflux-b4rt that I could find was years old and had parse errors in multiple PHP files. Lastly, I found that the version of transmission-cli available in YUM is no longer compatible with Torrentflux-b4rt. I did find it is possible to patch and compile a somewhat recent version of transmission, so that it is compatible with Torrentflux-b4rt once again. Fortunately, everything needed to fix these issues was available on github.com: torrentflux-b4rt source code, transmission source code, and the transmission patch. I forked each of these to ensure their survival as it relates to this project.
 
@@ -16,7 +16,7 @@ The goal of this project is to provide a single Dockerfile that will create a Do
 - Cron
 - Apache 2.4 HTTP
 - PHP 7.2
-- MariaDB 5.5
+- MariaDB 10.3
 - Torrentflux-b4rt 1.0_beta2
 
 **Packages Installed**
