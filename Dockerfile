@@ -31,15 +31,17 @@ RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7
 RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
     vlc rsync nc cronie openssh sudo syslog-ng mlocate git unzip bzip2 libcurl-devel \
     libevent-devel intltool openssl-devel perl-XML-Simple perl-XML-DOM perl-IO-Socket* \
-    perl-local-lib perl-App-cpanminus cpan && cpanm IO::Select
+    perl-local-lib perl-App-cpanminus cpan sysvinit-tools && cpanm IO::Select
             
 # Create MySQL Start Script
 RUN { \
     echo "#!/bin/bash"; \
-    echo "/usr/bin/mysqld_safe &"; \
+    echo "[[ \`pidof /usr/sbin/mysqld\` == \"\" ]] && /usr/bin/mysqld_safe &"; \
     echo "export SQL_TO_LOAD='/mysql_load_on_first_boot.sql';"; \
-    echo "[[ -e \$SQL_TO_LOAD ]] && { sleep 5 && /usr/bin/mysql -u root --password='' < \$SQL_TO_LOAD && mv \$SQL_TO_LOAD /usr/share/torrentflux/sql/custom.sql; }"; \
-    echo "while true; do sleep 60; done"; \
+    echo "while true; do"; \
+    echo "if [[ ! -d \"/var/lib/mysql/${DBNAME}\" ]]; then sleep 5 && /usr/bin/mysql -u root --password='' < \$SQL_TO_LOAD && mv \$SQL_TO_LOAD /torrentflux-b4rt_custom.sql && chown apache /var/www/html/downloads; fi"; \
+    echo "sleep 60;"; \
+    echo "done"; \
     } | tee /start-mysqld.sh && chmod a+x /start-mysqld.sh 
 
 # Install Torrentflux-b4rt    
@@ -101,45 +103,29 @@ RUN cd /root && wget https://github.com/XelaNull/transmission-releases/raw/maste
 # Compile cksfv
 RUN cd /root && git clone https://github.com/vadmium/cksfv.git && cd cksfv && ./configure && make && make install
 
-# Configure supervisord
+# Create supervisord.conf file
 RUN { \
+    echo '#!/bin/bash'; \
+    echo 'echo "[program:$1]";'; \
+    echo 'echo "process_name=$1";'; \
+    echo 'echo "autostart=true";'; \
+    echo 'echo "autorestart=false";'; \
+    echo 'echo "directory=/";'; \
+    echo 'echo "command=$2";'; \
+    echo 'echo "startsecs=3";'; \
+    echo 'echo "priority=1";'; \
+    echo 'echo "";'; \
+  } | tee /gen_sup.sh && chmod a+x /gen_sup.sh && \
+  { \
     echo '[supervisord]'; \
     echo 'nodaemon        = true'; \
     echo 'user            = root'; \
     echo 'logfile         = /var/log/supervisord'; echo; \
-    echo '[program:syslog-ng]'; \
-    echo 'process_name    = syslog-ng'; \
-    echo 'autostart       = true'; \
-    echo 'autorestart     = unexpected'; \
-    echo 'directory       = /etc'; \
-    echo 'command         = /usr/sbin/syslog-ng -F'; \
-    echo 'startsecs       = 1'; \
-    echo 'priority        = 1'; echo; \
-    echo '[program:crond]'; \
-    echo 'process_name    = crond'; \
-    echo 'autostart       = true'; \
-    echo 'autorestart     = unexpected'; \
-    echo 'directory       = /'; \
-    echo 'command         = /usr/sbin/crond -n'; \
-    echo 'startsecs       = 3'; \
-    echo 'priority        = 1'; echo; \
-    echo '[program:httpd]'; \
-    echo 'process_name    = httpd'; \
-    echo 'autostart       = true'; \
-    echo 'autorestart     = unexpected'; \
-    echo 'directory       = /'; \
-    echo 'command         = /usr/sbin/apachectl -D FOREGROUND'; \
-    echo 'startsecs       = 3'; \
-    echo 'priority        = 1'; echo; \
-    echo '[program:mysqld]'; \
-    echo 'process_name    = mysqld'; \
-    echo 'autostart       = true'; \
-    echo 'autorestart     = unexpected'; \
-    echo 'directory       = /'; \
-    echo 'command         = /start-mysqld.sh'; \
-    echo 'startsecs       = 3'; \
-    echo 'priority        = 1'; echo; \
-    } | tee /etc/supervisord.conf
+  } | tee /etc/supervisord.conf && \  
+    /gen_sup.sh syslog-ng "/usr/sbin/syslog-ng -F" >> /etc/supervisord.conf && \
+    /gen_sup.sh crond "/usr/sbin/crond -n" >> /etc/supervisord.conf && \
+    /gen_sup.sh httpd "/usr/sbin/apachectl -D FOREGROUND" >> /etc/supervisord.conf && \
+    /gen_sup.sh mysqld "/start-mysqld.sh" >> /etc/supervisord.conf 
     
 # Ensure all packages are up-to-date, then fully clean out all cache
 RUN yum -y update && yum clean all && rm -rf /tmp/* && rm -rf /var/tmp/*
