@@ -39,7 +39,7 @@ docker build -t centos7/b4rt .
 **To Run:**
 
 ```
-docker run -d --name=CENTOS7-b4rt -p 8080:80 centos7/b4rt
+docker run -d -p 8080:80 -v $(pwd)/downloads:/var/www/html/downloads --name=CENTOS7-b4rt centos7/b4rt
 ```
 
 **To Access:**
