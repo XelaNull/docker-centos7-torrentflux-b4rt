@@ -40,7 +40,7 @@ RUN { \
     echo "export SQL_TO_LOAD='/mysql_load_on_first_boot.sql';"; \
     echo "while true; do"; \
     echo "if [[ ! -d \"/var/lib/mysql/${DBNAME}\" ]]; then sleep 5 && /usr/bin/mysql -u root --password='' < \$SQL_TO_LOAD && mv \$SQL_TO_LOAD /torrentflux-b4rt_custom.sql && chown apache /var/www/html/downloads; fi"; \
-    echo "sleep 60;"; \
+    echo "sleep 10;"; \
     echo "done"; \
     } | tee /start-mysqld.sh && chmod a+x /start-mysqld.sh 
 
