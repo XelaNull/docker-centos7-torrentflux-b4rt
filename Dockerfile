@@ -30,10 +30,8 @@ RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7
 # Install all other YUM-based packages
 RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
     vlc rsync nc cronie openssh sudo syslog-ng mlocate git unzip bzip2 libcurl-devel \
-    libevent-devel intltool openssl-devel perl-XML-Simple perl-XML-DOM perl-IO-Socket-IP \
-    perl-local-lib cpan
-RUN perl -MCPAN -e "install IO::Select" && \
-    perl -MCPAN -e "install IO::Socket::UNIX"
+    libevent-devel intltool openssl-devel perl-XML-Simple perl-XML-DOM perl-IO-Socket* \
+    perl-local-lib perl-App-cpanminus cpan && cpanm IO::Select
             
 # Create MySQL Start Script
 RUN { \
@@ -42,7 +40,7 @@ RUN { \
     echo "export SQL_TO_LOAD='/mysql_load_on_first_boot.sql';"; \
     echo "[[ -e \$SQL_TO_LOAD ]] && { sleep 5 && /usr/bin/mysql -u root --password='' < \$SQL_TO_LOAD && mv \$SQL_TO_LOAD /usr/share/torrentflux/sql/custom.sql; }"; \
     echo "while true; do sleep 60; done"; \
-    } | tee /start-mysqld.sh && chmod a+x /start-mysqld.sh && /usr/libexec/mariadb-prepare-db-dir
+    } | tee /start-mysqld.sh && chmod a+x /start-mysqld.sh 
 
 # Install Torrentflux-b4rt    
 RUN cd /usr/share && git clone https://github.com/XelaNull/torrentflux-b4rt-php7 && mv torrentflux-b4rt-php7 torrentflux && \
@@ -72,8 +70,6 @@ RUN { \
     sed -i 's|/usr/local/bin/vlc|/usr/bin/vlc|g' /tmp.sql && \
     sed -i 's|/usr/local/bin/transmissioncli|/usr/local/bin/transmission-cli|g' /tmp.sql && \
     sed -i 's|/var/www/|/var/www/html/|g' /tmp.sql && \
-    sed -i "s|'enable_index_meta_refresh','0'|'enable_index_meta_refresh','1'|g"; /tmp.sql && \
-    sed -i "s|'enable_index_ajax_update','0'|'enable_index_ajax_update','1'|g"; /tmp.sql && \
     sed -i "s|'enable_nzbperl','0'|'enable_nzbperl','1'|g" /tmp.sql && \
     sed -i "s|'ui_displayfluxlink','1'|'ui_displayfluxlink','0'|g" /tmp.sql && \
     sed -i "s|'ui_displaylinks','1'|'ui_displaylinks','0'|g" /tmp.sql && \
@@ -86,6 +82,8 @@ RUN { \
     sed -i "s|'ui_displayusers','1'|'ui_displayusers','0'|g" /tmp.sql && \
     sed -i 's|PRIMARY KEY  (user_id,date)|PRIMARY KEY  (user_id)|g' /tmp.sql && \
     sed -i "s|date DATE NOT NULL default '0000-00-00'|date TIMESTAMP NOT NULL default CURRENT_TIMESTAMP|g" /tmp.sql && \
+    sed -i "s|meta_refresh','0'|meta_refresh','1'|g" /tmp.sql && \
+    sed -i "s|ajax_update','0'|ajax_update','1'|g" /tmp.sql && \
     cat /tmp.sql >> /mysql_load_on_first_boot.sql
 
 # Install rar, unrar, and uudeview
@@ -100,6 +98,7 @@ RUN cd /root && wget https://github.com/XelaNull/transmission-releases/raw/maste
     rm -rf libtransmission/transmission.h && cp torrentflux/clients/transmission/transmission-2.73/transmission.h libtransmission/ && \
     ./configure --enable-cli --enable-daemon && make && strip cli/transmission-cli && cp cli/transmission-cli /usr/local/bin/
 
+# Compile cksfv
 RUN cd /root && git clone https://github.com/vadmium/cksfv.git && cd cksfv && ./configure && make && make install
 
 # Configure supervisord
@@ -144,6 +143,9 @@ RUN { \
     
 # Ensure all packages are up-to-date, then fully clean out all cache
 RUN yum -y update && yum clean all && rm -rf /tmp/* && rm -rf /var/tmp/*
+
+# Define the downloads directory as an externally mounted volume
+VOLUME ["/var/www/html/downloads"]
 
 # Set to start the supervisor daemon on bootup
 ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
