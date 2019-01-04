@@ -10,9 +10,18 @@ ENV TIMEZONE="America/New_York"
 # First install EPEL & Webtatic REPOs as they are needed for some of the initial packages
 RUN yum -y install epel-release yum-utils
 
+# Install newest stable MariaDB: 10.3
+RUN { \
+    echo "[mariadb]"; \
+    echo "name = MariaDB"; \
+    echo "baseurl = http://yum.mariadb.org/10.3/centos7-amd64"; \
+    echo "gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB"; \
+    echo "gpgcheck=1"; \
+    } | tee /etc/yum.repos.d/MariaDB-10.3.repo && yum -y install MariaDB-server MariaDB-client
+
 # Install Webtatic YUM REPO, to provide PHP7
 RUN rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm && \
-    yum -y install mod_php72w php72w-opcache php72w-cli php72w-mysqli httpd mariadb-server
+    yum -y install mod_php72w php72w-opcache php72w-cli php72w-mysqli httpd
   
 # Install VLC via RPMFusion REPOT
 RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm -y && \
@@ -21,8 +30,10 @@ RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7
 # Install all other YUM-based packages
 RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
     vlc rsync nc cronie openssh sudo syslog-ng mlocate git unzip bzip2 libcurl-devel \
-    libevent-devel intltool openssl-devel
-        
+    libevent-devel intltool openssl-devel perl-XML-Simple perl-XML-DOM perl-IO-Socket-IP
+RUN perl -MCPAN -e "install IO::Select" && \
+    perl -MCPAN -e "install IO::Socket::UNIX"
+            
 # Create MySQL Start Script
 RUN { \
     echo "#!/bin/bash"; \
@@ -60,6 +71,13 @@ RUN { \
     sed -i 's|/usr/local/bin/vlc|/usr/bin/vlc|g' /tmp.sql && \
     sed -i 's|/usr/local/bin/transmissioncli|/usr/local/bin/transmission-cli|g' /tmp.sql && \
     sed -i 's|/var/www/|/var/www/html/|g' /tmp.sql && \
+    sed -i "s|'enable_index_meta_refresh','0'|'enable_index_meta_refresh','1'|g"; /tmp.sql && \
+    sed -i "s|'enable_index_ajax_update','0'|'enable_index_ajax_update','1'|g"; /tmp.sql && \
+    sed -i "s|'enable_nzbperl','0'|'enable_nzbperl','1'|g" /tmp.sql && \
+    sed -i "s|'ui_displayfluxlink','1'|'ui_displayfluxlink','0'|g" /tmp.sql && \
+    sed -i "s|'ui_displaylinks','1'|'ui_displaylinks','0'|g" /tmp.sql && \
+    sed -i "s|'fluxd_dbmode','php'|'fluxd_dbmode','perl'|g" /tmp.sql && \
+    sed -i "s|'fluxd_Qmgr_enabled','0'|'fluxd_Qmgr_enabled','1'|g" /tmp.sql && \
     sed -i "s|'enable_home_dirs','1'|'enable_home_dirs','0'|g" /tmp.sql && \
     sed -i "s|'sharekill','0'|'sharekill','1'|g" /tmp.sql && \
     sed -i "s|'fluxd_Qmgr_maxUserTransfers','2'|'fluxd_Qmgr_maxUserTransfers','5'|g" /tmp.sql && \
