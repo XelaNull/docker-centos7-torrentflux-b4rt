@@ -30,7 +30,7 @@ RUN yum install https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7
 # Install all other YUM-based packages
 RUN yum -y install bash wget supervisor vim-enhanced net-tools perl make gcc-c++ \
     vlc rsync nc cronie openssh sudo syslog-ng mlocate git unzip bzip2 libcurl-devel \
-    libevent-devel intltool openssl-devel perl-XML-Simple perl-XML-DOM perl-IO-Socket-IP
+    libevent-devel intltool openssl-devel perl-XML-Simple perl-XML-DOM perl-IO-Socket-IP cpan
 RUN perl -MCPAN -e "install IO::Select" && \
     perl -MCPAN -e "install IO::Socket::UNIX"
             
