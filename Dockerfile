@@ -10,7 +10,7 @@ ENV TIMEZONE="America/New_York"
 # First install EPEL & Webtatic REPOs as they are needed for some of the initial packages
 RUN yum -y install epel-release yum-utils
 
-# Install newest stable MariaDB: 10.3
+# Install newest stable MariaDB: 10.3 
 RUN { \
     echo "[mariadb]"; \
     echo "name = MariaDB"; \
