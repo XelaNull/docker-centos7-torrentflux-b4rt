@@ -4,6 +4,14 @@ Torrentflux-b4rt appears to be a dead project, with the original website no long
 
 **As best as I know, this project represents the newest working version of Torrentflux-b4rt, as a Dockerfile, as of January 2019.**
 
+## I've abandoned this project
+I've abandoned this project about as quickly as I started it, as I found that Torrentflux-b4rt does not utilize or support ANY modern torrent client. Most modern trackers will ban accounts for using the clients contained within Torrentflux-b4rt. Instead of modifying the code of this ancient project, I decided to seek out and find something newer, and ended up with: 
+
+https://github.com/XelaNull/docker-c7-rtorrent-flood
+
+## Even though I've abandoned this, I'm keeping this project online
+This project *DOES* contain a working install of Torrentflux-b4rt. Maybe someone somewhere down the line will be up to modifying the base code of Torrentflux-b4rt to support some other more modern torrent client, like rTorrent.
+
 If you just want standalone Torrentflux-b4rt package, please see: <https://github.com/XelaNull/torrentflux-b4rt-php7>
 
 This Dockerfile provides a single container image that provides an entire immediately-usable instance of Torrentflux-b4rt, already pre-configured with what I think are optimal settings for use on a seedbox. There is only a single pre-requisite for using this: **docker**
